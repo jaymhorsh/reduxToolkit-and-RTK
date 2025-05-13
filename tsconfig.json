@@ -1,4 +1,7 @@
-{
+{"compilerOptions": {
+    "noUnusedLocals": true,      // Warn/error on unused local variables and imports
+    "noUnusedParameters": true   // Warn/error on unused function parameters
+  },
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },
