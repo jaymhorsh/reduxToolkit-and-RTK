@@ -1,17 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
+import { Fragment } from "react/jsx-runtime";
 
-const fetchPosts = async () => {
-  const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+const fetchPosts = async (id:string) => {
+  const response = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`);
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }
   return response.json();
 };
-const Post = () => {
+const Post = ({id}:{id:string}) => {
   const { data, error, isLoading } = useQuery({
     queryKey: ["posts"],
-    queryFn: fetchPosts,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    queryFn: ()=>fetchPosts(id),
+    staleTime: 2000, // 5 minutes
   });
   return (
     <div className=" min-h-screen bg-red-500  flex  mx-auto items-center bg-gradient-to-br from-blue-100 to-purple-200">
@@ -20,14 +21,18 @@ const Post = () => {
         {isLoading && <p>Loading...</p>}
         {error && <p>Error: {error.message}</p>}
         {data && (
-          <ul className="space-y-4">
-            {data.slice(0,5).map((post: any) => (
-              <li key={post.id} className="bg-gray-100 p-4 rounded-lg shadow">
-                <h2 className="text-xl font-semibold">{post.title}</h2>
-                <p>{post.body}</p>
-              </li>
-            ))}
-          </ul>
+          // <ul className="space-y-4">
+          //   {data.slice(0,5).map((post: any) => (
+          //     <li key={post.id} className="bg-gray-100 p-4 rounded-lg shadow">
+          //       <h2 className="text-xl font-semibold">{post.title}</h2>
+          //       {/* <p>{post.body}</p> */}
+          //     </li>
+          //   ))}
+          <Fragment>
+            <h2 className="text-xl font-semibold">{data.title}</h2>
+            <p>{data.body}</p>
+          </Fragment>
+      
         )}
       </div>
     </div>

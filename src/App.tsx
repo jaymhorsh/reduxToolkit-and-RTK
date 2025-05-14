@@ -14,7 +14,7 @@ const handleMount = () => {
         className="bg-blue-500 text-white px-4 py-2 rounded"
         onClick={handleMount}
       >
-        {isMounted ? <Post/> : "Mount"} Component
+        {isMounted ? <Post id={'1'}/> : "Mount"} 
       </button>
     </div>
   );
