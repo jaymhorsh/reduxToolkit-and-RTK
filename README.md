@@ -314,3 +314,213 @@ MIT — use it freely for both commercial and personal projects.
 [@jaymhorsh](https://github.com/jaymhorsh) — Building clean, scalable fullstack systems.
 
 ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------- Zustand adnd React Query -----------------------------------------------
+
+# 🚀 Transportation Hub – Next.js + Zustand + React Query
+
+A modern Next.js project using [Zustand](https://zustand-demo.pmnd.rs/) for global state management and [TanStack React Query](https://tanstack.com/query/latest) for efficient server data fetching and caching.
+
+---
+
+## 🛠️ Installation
+
+```bash
+npm install zustand @tanstack/react-query
+# or
+yarn add zustand @tanstack/react-query
+```
+
+---
+
+## ⚡ Setup
+
+### 1. **Create a Zustand Store**
+
+Create `src/store/useTicketStore.ts`:
+
+```typescript
+import { create } from "zustand";
+
+type Ticket = {
+  fromTerminal: string;
+  toTerminal: string;
+  departureDate: string;
+  returnDate: string;
+  tripType: string;
+  numPassenger: string;
+  fromTerminalRef: string;
+  toTerminalRef: string;
+};
+
+type AvailableVehicle = {
+  acAvailable: string;
+  price: string;
+  id: string;
+  bookedSeat: number[];
+};
+
+type TicketState = {
+  ticket: Ticket;
+  bookedSeat: number[];
+  availableVehicle: AvailableVehicle;
+  setTicket: (ticket: Ticket) => void;
+  setBookedSeat: (seats: number[]) => void;
+  setAvailableVehicle: (vehicle: AvailableVehicle) => void;
+};
+
+export const useTicketStore = create<TicketState>((set) => ({
+  ticket: {
+    fromTerminal: "",
+    toTerminal: "",
+    departureDate: "",
+    returnDate: "",
+    tripType: "",
+    numPassenger: "",
+    fromTerminalRef: "",
+    toTerminalRef: "",
+  },
+  bookedSeat: [],
+  availableVehicle: {
+    acAvailable: "",
+    price: "",
+    id: "",
+    bookedSeat: [],
+  },
+  setTicket: (ticket) => set({ ticket }),
+  setBookedSeat: (bookedSeat) => set({ bookedSeat }),
+  setAvailableVehicle: (availableVehicle) => set({ availableVehicle }),
+}));
+```
+
+---
+
+### 2. **Set Up React Query Provider**
+
+In `pages/_app.tsx`:
+
+```typescript
+import type { AppProps } from 'next/app';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useState } from 'react';
+
+export default function App({ Component, pageProps }: AppProps) {
+  const [queryClient] = useState(() => new QueryClient());
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Component {...pageProps} />
+    </QueryClientProvider>
+  );
+}
+```
+
+---
+
+### 3. **Fetching Data with React Query and Syncing to Zustand**
+
+Example: Fetch available vehicles and store in Zustand.
+
+```typescript
+import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useTicketStore } from '../store/useTicketStore';
+
+const fetchVehicles = async () => {
+  const res = await fetch('/api/vehicles');
+  if (!res.ok) throw new Error('Failed to fetch');
+  return res.json();
+};
+
+export default function VehicleSyncer() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['vehicles'],
+    queryFn: fetchVehicles,
+  });
+
+  const setAvailableVehicle = useTicketStore((state) => state.setAvailableVehicle);
+
+  useEffect(() => {
+    if (data) {
+      setAvailableVehicle(data); // adapt if your API returns { vehicles: [...] }
+    }
+  }, [data, setAvailableVehicle]);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading vehicles</div>;
+  return null; // This component just syncs data, no UI needed
+}
+```
+
+---
+
+### 4. **Using Zustand State in Components**
+
+```typescript
+import { useTicketStore } from '../store/useTicketStore';
+
+export default function TicketInfo() {
+  const ticket = useTicketStore((state) => state.ticket);
+  const setTicket = useTicketStore((state) => state.setTicket);
+
+  // Example usage
+  // setTicket({ ...ticket, fromTerminal: "A" });
+
+  return (
+    <div>
+      <div>From: {ticket.fromTerminal}</div>
+      <div>To: {ticket.toTerminal}</div>
+      {/* ... */}
+    </div>
+  );
+}
+```
+
+---
+
+## 🗂️ Folder Structure
+
+```
+src/
+├── pages/
+├── store/
+│   └── useTicketStore.ts
+├── components/
+│   └── VehicleSyncer.tsx
+│   └── TicketInfo.tsx
+```
+
+---
+
+## ✅ Best Practices
+
+- Use **Zustand** for UI/global state.
+- Use **React Query** for all server data fetching and caching.
+- Sync server data to Zustand only when you need global access or want to persist it.
+- Keep your stores small and focused.
+
+---
+
+## 📚 Learn More
+
+- [Zustand Docs](https://docs.pmnd.rs/zustand/getting-started/introduction)
+- [React Query Docs](https://tanstack.com/query/latest/docs/framework/react/overview)
+- [Next.js Docs](https://nextjs.org/docs)
+
+---
+
+**Now you have a clean, scalable setup for global state and server data in your Next.js app!**
